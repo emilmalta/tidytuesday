@@ -24,7 +24,6 @@ spotify_songs_raw %>%
 
 
 # Tidy/transform ---------------------------------------------------------------
-
 spotify_songs <- spotify_songs_raw %>% 
   mutate(date = ymd(track_album_release_date),
          weekday = wday(date, week_start = 1, label = TRUE),
@@ -134,5 +133,29 @@ spotify_songs %>%
   facet_wrap(~ playlist_genre) +
   labs(title = "Release on fridays!",
        subtitle = "Fridays are by far the most popular weekday for album releases")
+
+# Maybe do the radar thing?
+spotify_songs %>% 
+  select(playlist_genre, track_popularity, danceability:duration_ms, -mode, -key) %>% 
+  group_by(playlist_genre) %>% 
+  top_n(100, track_popularity) %>% 
+  select(-track_popularity) %>% 
+  mutate_all(scales::rescale) %>% 
+  summarise_all(median, na.rm = T) %>% 
+  ungroup() %>% 
+  pivot_longer(-playlist_genre, names_to = "feature") %>% 
+  ggplot(aes(x = feature, y = value, color = playlist_genre, group = playlist_genre)) +
+  geom_point() +
+  geom_line() +
+  coord_polar(theta = "x") +
+  facet_wrap(~playlist_genre)
+
+spotify_songs %>% 
+  distinct(track_id, .keep_all = TRUE) %>% 
+  arrange(desc(track_popularity)) %>% 
+  head(20) %>% 
+  select(track_name, danceability:duration_ms, -mode, -key) %>% 
+  group_by(track_name) %>% 
+  mutate_all(scales::rescale)
 
 # TODO: Model all the things!
