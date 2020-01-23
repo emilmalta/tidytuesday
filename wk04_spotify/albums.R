@@ -39,20 +39,24 @@ albums <- spotify_songs_raw %>%
            fct_rev()) %>% 
   ggplot(aes(x = track_album_release_date, y = avg_rating, size = tracks,
              color = genre, group = 1, label = track_album_name)) +
-  geom_smooth(lty = 0, fill = "grey") +
-  geom_point(pch = 21) +
+  geom_smooth(lty = 0, fill = "salmon") +
+  geom_point(pch = 21, stroke = 1.1) +
   geom_text(alpha = 0.4, size = 3, check_overlap = TRUE, 
             family = "RobotoCondensed-Regular") +
   expand_limits(y = 100) +
-  theme_minimal(base_family = "RobotoCondensed-Regular") +
-  labs(title = "Album popularity across time", 
-       subtitle = "If you're listening to a 70's album on Spotify, it's probably a rock album",
-       x = NULL, y = "Avg track rating", size = "Tracks", color = "Genre"))
+  theme_minimal(base_family = "RobotoCondensed-Regular",
+                base_size = 15) +
+   labs(title = "Spotify album popularity across release dates", 
+        subtitle = "If you're listening to a 70's album on Spotify, it's probably a rock album",
+        x = NULL, y = "Avg track rating", size = "Tracks", color = "Genre") +
+  scale_radius(range = c(2, 20)) +
+  vapeplot::scale_color_vapeplot_d())
 
 # Small facetted one:
 (p2 <- p1 +
   facet_wrap(~ genre, nrow = 1) +
   theme(strip.text = element_text(hjust = 0)) +
+  lims(y = c(0,100)) +
   labs(title = NULL, subtitle = NULL, x = "Album release date"))
 
 # Patchwork! -------------------------------------------------------------------
@@ -61,13 +65,27 @@ layout <- "
 AAAA
 AAAA
 AAAA
+AAAA
+AAAA
 BBBB
 "
 
 (p1 / p2) +
-  plot_layout(design = layout, guides = "collect") &
+  plot_layout(design = layout, 
+              guides = "collect")
+
+&
   guides(size  = guide_legend(order = 1, override.aes = list(fill = NA)),
          color = guide_legend(override.aes = list(fill = NA))) &
   theme(legend.position = "bottom",
         legend.box = "horizontal",
-        legend.justification = 1)
+        legend.justification = 1,
+        panel.background = element_rect(
+          fill = "#F5F5F5",
+          colour = "#F5F5F5",
+          size = 0.5),
+        plot.background = element_rect(
+          fill = "#F5F5F5", 
+          color = "#F5F5F5"))
+
+ggsave("wk04_spotify/albums.png", width = 25, height = 35, unit = "cm", dpi = 600)
