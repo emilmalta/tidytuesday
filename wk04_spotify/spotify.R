@@ -1,4 +1,5 @@
 # ALGORHYTHM :_: WHAT MAKES A SONG POPULAR ON SPOTIFY?
+# This is the initial script, where I mess arounf and get to know the data
 
 # Load libraries ---------------------------------------------------------------
 
@@ -157,5 +158,3 @@ spotify_songs %>%
   select(track_name, danceability:duration_ms, -mode, -key) %>% 
   group_by(track_name) %>% 
   mutate_all(scales::rescale)
-
-# TODO: Model all the things!
