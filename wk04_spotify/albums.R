@@ -71,10 +71,7 @@ BBBB
 "
 
 (p1 / p2) +
-  plot_layout(design = layout, 
-              guides = "collect")
-
-&
+  plot_layout(design = layout, guides = "collect")&
   guides(size  = guide_legend(order = 1, override.aes = list(fill = NA)),
          color = guide_legend(override.aes = list(fill = NA))) &
   theme(legend.position = "bottom",
