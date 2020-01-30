@@ -73,7 +73,7 @@ ggplot() +
   theme(
     plot.background = element_rect(fill = "#f5f5f5"),
     legend.position = "none") +
-  labs(title = "Trees of San Fransisco", 
+  labs(title = "Trees of San Francisco", 
        caption = "Source: data.sfgov.org | #TidyTuesday")
 
 # Save -------------------------------------------------------------------------
