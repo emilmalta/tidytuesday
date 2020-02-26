@@ -8,6 +8,8 @@ library(ggchicklet)
 library(WDI)
 library(janitor)
 library(statgl)
+library(fuzzyjoin)
+library(countrycode)
 
 # Import data ------------------------------------------------------------------
 
@@ -24,34 +26,22 @@ gdp_world <-
   as_tibble() %>% 
   clean_names()
 
-# Todu/transform ---------------------------------------------------------------
+# Tidy/transform ---------------------------------------------------------------
 
 world_indicators <-
   pop_world %>% 
   full_join(gdp_world, by = c("iso2c", "country")) %>% 
   arrange(desc(sp_pop_totl)) %>% 
+  select(-country, -starts_with("year")) %>% 
   filter(income != "Aggregates")
 
 income_levels <- 
   c("Low income", "Lower middle income", "Upper middle income", "High income")
 
-food_consumption <-
+food_consumption <- 
   food_consumption_raw %>% 
-  mutate(country = case_when(
-    country == "USA" ~ "United States",
-    country == "Bahamas" ~ "Bahamas, The",
-    country == "Venezuela" ~ "Venezuela, RB",
-    country == "Russia" ~ "Russian Federation",
-    country == "South Korea" ~ "Korea, Rep.",
-    country == "Egypt" ~ "Egypt, Arab Rep.",
-    country == "Slovakia" ~ "Slovak Republic",
-    country == "Hong Kong SAR. China" ~ "Hong Kong SAR, China",
-    country == "Iran" ~ "Iran, Islamic Rep.",
-    country == "Congo" ~"Congo, Rep.",
-    country == "Gambia" ~ "Gambia, The",
-    T ~ country
-  )) %>% 
-  left_join(world_indicators, by = "country") %>% 
+  mutate(iso2c = countrycode(country, origin = "country.name", destination = "iso2c")) %>% 
+  left_join(world_indicators, by = "iso2c") %>% 
   drop_na() %>% 
   mutate(
     food_category = food_category %>% word() %>% 
@@ -60,8 +50,6 @@ food_consumption <-
   )
 
 # Visualise --------------------------------------------------------------------
-
-options(scipen=10000)
 
 p1 <- 
   food_consumption %>% 
@@ -77,16 +65,17 @@ p1 <-
   scale_fill_statgl(palette = "grey") +
   labs(x = "", y = "Annual CO2 emission per person (log scale)", 
        title = "Beef",
-       subtitle = "CO2 emissions of 122 countries by food group") +
+       subtitle = "CO2 emissions of 123 countries by food group") +
   theme_minimal() +
   theme(
     axis.ticks = element_blank(),
     axis.text.x.bottom = element_blank(),
-    #legend.position = c(2,1),
     panel.grid.minor = element_blank(),axis.title.y = element_text(hjust = 0)
   ) +
-  labs(title = "Carbon footprint of food",
-       fill = "Income", size = "Population of country")
+  labs(
+    title = "Carbon footprint of food",
+    fill = "Income", size = "Population of country"
+  )
 
 
 p2 <- (food_consumption %>% 
